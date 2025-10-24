@@ -17,7 +17,7 @@ Lâ€™API respecte les bonnes pratiques REST et les rÃ¨gles mÃ©tier (stoc
 
 ## Membres de lâ€™Ã©quipe & rÃ©partition des tÃ¢ches
 
-Membre (Penuel & Alvin Obo)
+Membre (Penuel Essoh & Alvin Obo)
 
 **Penuel Essoh** Back-end | Architecture du backend, routes Express, validation des endpoints
 **Alvin Obo** Base de donnÃ©es | ModÃ©lisation SQL, scripts `schema.sql` et `seed.sql`
@@ -39,7 +39,7 @@ Membre (Penuel & Alvin Obo)
 1. **Cloner le dÃ©pÃ´t :**
    ```bash
    git clone https://github.com/pen225/bookshop-api.git
-   cd bookshop-api
+   cd bookshop-ap
    
 ---
 
