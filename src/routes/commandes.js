@@ -1,14 +1,17 @@
 const express = require('express');
+const { body } = require('express-validator');
+const { validate } = require('../middleware/validate');
+const { authenticate } = require('../middleware/auth');
+const ctrl = require('../controllers/commandesController');
 const router = express.Router();
-const auth = require('../middlewares/authMiddleware');
-const validate = require('../middlewares/validateRequest');
-const { createCommande } = require('../validators/commandeValidator');
-const commandeCtrl = require('../controllers/commandeController');
 
-router.use(auth);
-router.post('/', createCommande, validate, commandeCtrl.create);
-router.get('/', commandeCtrl.listForUser);
-router.get('/:id', commandeCtrl.getById);
-router.put('/:id/status', commandeCtrl.updateStatus); // admin/gestionnaire check inside
+router.post('/', authenticate, [
+  body('items').optional().isArray({ min: 1 }),
+  body('adresse_livraison').optional().isString(),
+  body('mode_paiement').optional().isString()
+], validate, ctrl.createCommande);
+
+router.get('/', authenticate, ctrl.listMy);
+router.get('/:id', authenticate, ctrl.detailMy);
 
 module.exports = router;

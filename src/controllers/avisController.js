@@ -1,15 +1,21 @@
-const avisService = require('../services/avisService');
+const pool = require('../config/db');
 
-exports.create = async (req, res, next) => {
+exports.addAvis = async (req, res, next) => {
   try {
-    const ouvrageId = Number(req.params.id);
-    const clientId = req.user.id;
+    const { ouvrageId } = req.params;
     const { note, commentaire } = req.body;
-    // Service verfie achat
-    const avis = await avisService.createIfBought(clientId, ouvrageId, note, commentaire);
-    res.status(201).json(avis);
-  } catch (err) {
-    if (err.message === 'No purchase found') return res.status(403).json({ error: 'Vous devez acheter ce produit pour laisser un avis' });
-    next(err);
-  }
+    const clientId = req.user.id;
+
+    const [rows] = await pool.query(
+      `SELECT 1 FROM commandes c JOIN commande_items ci ON ci.commande_id=c.id
+       WHERE c.client_id=? AND ci.ouvrage_id=? LIMIT 1`, [clientId, ouvrageId]
+    );
+    if (!rows.length) return res.status(400).json({ message: 'Vous devez avoir acheté cet ouvrage pour laisser un avis.' });
+
+    await pool.query(
+      'INSERT INTO avis (client_id, ouvrage_id, note, commentaire) VALUES (?,?,?,?)       ON DUPLICATE KEY UPDATE note=VALUES(note), commentaire=VALUES(commentaire), date=NOW()',
+      [clientId, ouvrageId, note, commentaire || null]
+    );
+    res.status(201).json({ message: 'Avis enregistré' });
+  } catch (e) { next(e); }
 };

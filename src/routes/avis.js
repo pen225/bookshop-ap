@@ -1,11 +1,14 @@
 const express = require('express');
-const router = express.Router({ mergeParams: true });
-const auth = require('../middlewares/authMiddleware');
-const validate = require('../middlewares/validateRequest');
-const { createAvis } = require('../validators/avisValidator');
-const avisCtrl = require('../controllers/avisController');
+const { body, param } = require('express-validator');
+const { authenticate } = require('../middleware/auth');
+const { validate } = require('../middleware/validate');
+const ctrl = require('../controllers/avisController');
+const router = express.Router();
 
-// creation d'avis pour ouvrage : POST /api/ouvrages/:id/avis
-router.post('/:id/avis', auth, createAvis, validate, avisCtrl.create);
+router.post('/:ouvrageId/avis', authenticate, [
+  param('ouvrageId').isInt({ gt: 0 }),
+  body('note').isInt({ min: 1, max: 5 }),
+  body('commentaire').optional().isString()
+], validate, ctrl.addAvis);
 
 module.exports = router;

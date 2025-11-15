@@ -1,13 +1,18 @@
 const express = require('express');
+const { body, param } = require('express-validator');
+const { authenticate, authorizeRoles } = require('../middleware/auth');
+const { validate } = require('../middleware/validate');
+const ctrl = require('../controllers/commentairesController');
 const router = express.Router();
-const auth = require('../middlewares/authMiddleware');
-const role = require('../middlewares/roleMiddleware');
-const validate = require('../middlewares/validateRequest');
-const { createCommentaire } = require('../validators/commentaireValidator');
-const commentaireCtrl = require('../controllers/commentaireController');
 
-router.post('/', auth, createCommentaire, validate, commentaireCtrl.create);
-router.put('/:id/valider', auth, role('editeur'), commentaireCtrl.validateComment);
-router.delete('/:id', auth, commentaireCtrl.remove);
+router.post('/', authenticate, [
+  body('ouvrage_id').isInt({ gt: 0 }),
+  body('contenu').isString().notEmpty()
+], validate, ctrl.addCommentaire);
+
+router.put('/:id/valider', authenticate, authorizeRoles('editeur','administrateur'), [
+  param('id').isInt({ gt: 0 }),
+  body('valide').isBoolean()
+], validate, ctrl.valider);
 
 module.exports = router;

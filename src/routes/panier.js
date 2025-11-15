@@ -1,14 +1,16 @@
 const express = require('express');
+const { body, param } = require('express-validator');
+const { authenticate } = require('../middleware/auth');
+const { validate } = require('../middleware/validate');
+const ctrl = require('../controllers/panierController');
 const router = express.Router();
-const auth = require('../middlewares/authMiddleware');
-const validate = require('../middlewares/validateRequest');
-const { addItem, updateItem } = require('../validators/panierValidator');
-const panierCtrl = require('../controllers/panierController');
 
-router.use(auth);
-router.get('/', panierCtrl.getCurrent);
-router.post('/items', addItem, validate, panierCtrl.addItem);
-router.put('/items/:id', updateItem, validate, panierCtrl.updateItem);
-router.delete('/items/:id', panierCtrl.removeItem);
+router.get('/', authenticate, ctrl.getPanierActif);
+router.post('/items', authenticate, [
+  body('ouvrage_id').isInt({ gt: 0 }),
+  body('quantite').isInt({ gt: 0 })
+], validate, ctrl.addItem);
+router.put('/items/:id', authenticate, [ param('id').isInt({ gt: 0 }), body('quantite').isInt({ gt: 0 }) ], validate, ctrl.updateItem);
+router.delete('/items/:id', authenticate, [ param('id').isInt({ gt: 0 }) ], validate, ctrl.removeItem);
 
 module.exports = router;
